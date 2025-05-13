@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AnimeStatus {
+  RELEASED // Вышел
+  ONGOING // Идёт
+  PAUSED // Приостановлен
+  PLANNED // Запланирован
+}
+
+enum StatusViewingUser {
+  POSTPONED //Отложено
+  WATCHING //Смотрю
+  VIEWED //Просмотренно
+  ABANDONED //Брошено
+  PLANNED //Заплонировано
+  REVIEWING //Пересматриваю
+}
+
+enum AnimeSource {
+  MANGA //Манга
+  GAME //Игра
+  ORIGINAL //Оригинал
+  OTHER //Другое
+  WEB_MANGA //Веб-манга(сразу на телефонах, сайтах)
+  LIGHT_NOVELLA // Легкая новелла(книги с картинками)
+  RANOBE //Ранобэ
+  VISUAL_NOVELLA //Визуальная новелла(игра)
+}
+
+enum Type {
+  FILN //фильм
+  TV_SERIES //тв сериал
+  SPECIAL //спешл
+  OVA
+  ONA
+}
+
+model User {
+  id            Int             @id @default(autoincrement())
+  nickName      String          @unique
+  firstName     String?
+  lastMame      String?
+  midName       String?
+  password      String
+  email         String          @unique
+  isApproved    Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  role          Role            @relation(fields: [roleId], references: [id])
+  roleId        Int
+  review        Review[]
+  comment       Comment[]
+  statusViewing StatusViewing[]
+}
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String
+  users User[]
+}
+
+model Anime {
+  id               Int             @id @default(autoincrement())
+  name             String
+  description      String
+  releaseDate      DateTime
+  endDate          DateTime?
+  episodesReleased Int
+  episodesTotal    Int?
+  status           AnimeStatus
+  season           String
+  source           AnimeSource
+  studio           String
+  ageRating        Int
+  posterURl        String
+  genres           Genres[]
+  averageRating    Float?
+  review           Review[]
+  characters       Characters[]
+  statusViewing    StatusViewing[]
+  type             Type
+  related          Anime[]         @relation("RelatedAnime")
+  symmetricRelated Anime[]         @relation("RelatedAnime")
+  //TODO сделать для картинок
+}
+
+model Genres {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  anime Anime[]
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  anime     Anime    @relation(fields: [animeId], references: [id])
+  animeId   Int
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId Int?     @unique
+  createdAt DateTime @default(now())
+  rating    Int
+}
+
+model Comment {
+  id     Int     @id @default(autoincrement())
+  review Review?
+
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  text      String
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId  Int?
+  replies   Comment[] @relation("CommentReplies")
+  createdAt DateTime  @default(now())
+}
+
+model Characters {
+  id         Int     @id @default(autoincrement())
+  name       String
+  photoURL   String
+  voiceActor String
+  anime      Anime[]
+}
+
+model StatusViewing {
+  id      Int               @id @default(autoincrement())
+  user    User              @relation(fields: [userId], references: [id])
+  userId  Int
+  anime   Anime             @relation(fields: [animeId], references: [id])
+  animeId Int
+  status  StatusViewingUser
+}
