@@ -49,20 +49,21 @@ enum Type {
 }
 
 model User {
-  id            Int             @id @default(autoincrement())
-  nickName      String          @unique
-  firstName     String?
-  lastMame      String?
-  midName       String?
-  password      String
-  email         String          @unique
-  isApproved    Boolean         @default(false)
-  createdAt     DateTime        @default(now())
-  role          Role            @relation(fields: [roleId], references: [id])
-  roleId        Int
-  review        Review[]
-  comment       Comment[]
-  statusViewing StatusViewing[]
+  id                     Int             @id @default(autoincrement())
+  nickName               String          @unique
+  firstName              String?
+  lastMame               String?
+  midName                String?
+  password               String
+  email                  String          @unique
+  isApproved             Boolean         @default(false)
+  createdAt              DateTime        @default(now())
+  role                   Role            @relation(fields: [roleId], references: [id])
+  roleId                 Int
+  review                 Review[]
+  comment                Comment[]
+  statusViewing          StatusViewing[]
+  emailConfirmationToken String          @unique
 }
 
 model Role {

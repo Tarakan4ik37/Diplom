@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import bcrypt from 'bcrypt';
 import createError from 'http-errors';
+import { v4 as uuidv4 } from 'uuid';
+import { sendConfirmationEmail } from '../smtp/utils.ts';
 
 export class AuthService {
     constructor(private readonly fastify: FastifyInstance) {}
@@ -81,7 +83,9 @@ export class AuthService {
             });
         }
 
-        await this.fastify.prisma.user.create({
+        const emailConfirmationToken = uuidv4();
+
+        const createdUser = await this.fastify.prisma.user.create({
             data: {
                 email,
                 password: hashedPassword,
@@ -89,7 +93,32 @@ export class AuthService {
                 role: {
                     connect: userRole,
                 },
+                emailConfirmationToken,
             },
+        });
+
+        try {
+            await sendConfirmationEmail(email, emailConfirmationToken);
+        } catch {
+            await this.fastify.prisma.user.delete({
+                where: { id: createdUser.id },
+            });
+            throw new Error('Smtp down');
+        }
+    }
+
+    public async confirmEmail(token: string) {
+        const user = await this.fastify.prisma.user.findFirst({
+            where: { emailConfirmationToken: token },
+        });
+
+        if (!user) {
+            throw createError(404, 'Пользователь с данным токеном не найден');
+        }
+
+        await this.fastify.prisma.user.update({
+            where: { id: user.id },
+            data: { isApproved: true },
         });
     }
 }

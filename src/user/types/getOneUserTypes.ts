@@ -2,9 +2,9 @@ export type GetOneUserResponse = {
     id: number;
     nickName: string;
     email: string;
-    firstName?: String | null;
-    lastName?: String | null;
-    midName?: String | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    midName?: string | null;
     isApproved: boolean;
 };
 

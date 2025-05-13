@@ -97,7 +97,7 @@ export async function authController(fastify: FastifyInstance) {
                         maxAge: refreshTokenTtl,
                     })
                     .send({ success: true });
-            } catch (err) {
+            } catch {
                 reply.status(401).send({ error: 'Invalid refresh token' });
             }
         },
@@ -111,6 +111,27 @@ export async function authController(fastify: FastifyInstance) {
                 .clearCookie('accessToken', { path: '/' })
                 .clearCookie('refreshToken', { path: '/' })
                 .send({ success: true });
+        },
+    );
+
+    fastify.get<{ Querystring: { token: string } }>(
+        '/confirm-email',
+        {
+            schema: {
+                tags: ['auth'],
+                querystring: {
+                    type: 'object',
+                    properties: {
+                        token: { type: 'string' },
+                    },
+                },
+            },
+        },
+        async (request, reply) => {
+            await authService.confirmEmail(request.query.token);
+
+            // TODO: поменять на страницу входа на фронте
+            reply.redirect('http://localhost:3000/login', 302);
         },
     );
 }
