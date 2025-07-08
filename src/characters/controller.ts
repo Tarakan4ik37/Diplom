@@ -22,7 +22,6 @@ export async function charactersController(fastify: FastifyInstance) {
     fastify.get<CharactersGetManyRequest>(
         '/characters',
         {
-            preHandler: [fastify.admin],
             schema: {
                 tags: ['characters'],
                 querystring: charactersGetManyRequest,

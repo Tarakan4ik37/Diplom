@@ -15,6 +15,7 @@ export const charactersGetManyRequest = {
         isDescending: { type: 'boolean', nullable: true },
         nameAnime: { type: 'string', nullable: true },
     },
+    required: ['page', 'limit'],
 };
 
 export const charactersGetManyResponse = {
@@ -34,8 +35,10 @@ export const charactersGetManyResponse = {
                         id: { type: 'number' },
                         name: { type: 'string' },
                     },
+                    required: ['id', 'name'],
                 },
             },
         },
+        required: ['id', 'name', 'photoURL', 'anime', 'voiceActor'],
     },
 };

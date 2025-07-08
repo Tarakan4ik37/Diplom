@@ -1,47 +1,39 @@
 import { $Enums } from '@prisma/client';
 import { convertEnumToScheme } from '../../generic/utils.ts';
 import { queryPaginationScheme } from '../../generic/schemes.ts';
-import { SortBy } from '../types/getManyAnimeTypes.ts';
 
-export const animeGetManyRequest = {
+export const statusGetManyRequest = {
     type: 'object',
     properties: {
         ...queryPaginationScheme,
         search: { type: 'string', nullable: true },
-        startYear: { type: 'number', nullable: true },
-        endYear: { type: 'number', nullable: true },
-        genres: { type: 'array', items: { type: 'number' }, nullable: true },
-        includeAllGenres: { type: 'boolean', nullable: true },
-        type: {
-            type: 'string',
-            enum: convertEnumToScheme($Enums.Type),
-            nullable: true,
-        },
         status: {
             type: 'string',
-            enum: convertEnumToScheme($Enums.AnimeStatus),
+            enum: convertEnumToScheme($Enums.StatusViewingUser),
             nullable: true,
         },
-        sortBy: {
-            type: 'string',
-            enum: convertEnumToScheme(SortBy),
-            nullable: true,
-        },
-        isDescending: { type: 'boolean', nullable: true },
     },
     required: ['page', 'limit'],
 };
 
-export const animeGetManyResponse = {
+export const statusGetManyResponse = {
     type: 'array',
     items: {
         type: 'object',
         properties: {
-            id: { type: 'number', nullable: false },
+            id: { type: 'number' },
             name: { type: 'string' },
-            type: { type: 'string', enum: convertEnumToScheme($Enums.Type) },
+            type: {
+                type: 'string',
+                enum: convertEnumToScheme($Enums.Type),
+            },
             posterURl: { type: 'string' },
             averageRating: { type: 'number' },
+            description: { type: 'string' },
+            releaseDate: {
+                type: 'string',
+                format: 'date-time',
+            },
             genres: {
                 type: 'array',
                 items: {
@@ -50,11 +42,8 @@ export const animeGetManyResponse = {
                         id: { type: 'number' },
                         name: { type: 'string' },
                     },
-                    required: ['id', 'name'],
                 },
             },
-            description: { type: 'string' },
-            releaseDate: { type: 'string', format: 'date-time' },
         },
         required: [
             'id',

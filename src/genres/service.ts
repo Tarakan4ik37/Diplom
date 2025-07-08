@@ -12,28 +12,12 @@ import {
 export class GenresService {
     constructor(private readonly fastify: FastifyInstance) {}
 
-    public async getMany({
-        page,
-        limit,
-        search,
-        isDescending,
-    }: GenresGetManyRequest['Querystring']): Promise<GenresGetManyResponse> {
+    public async getMany({}: GenresGetManyRequest['Querystring']): Promise<GenresGetManyResponse> {
         return this.fastify.prisma.genres.findMany({
             select: {
                 id: true,
                 name: true,
             },
-            where: {
-                name: search
-                    ? {
-                          contains: search,
-                          mode: 'insensitive',
-                      }
-                    : undefined,
-            },
-            skip: (page - 1) * limit,
-            take: limit,
-            orderBy: { name: isDescending ? 'desc' : 'asc' },
         });
     }
 

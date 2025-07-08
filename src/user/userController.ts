@@ -31,6 +31,7 @@ export async function userController(fastify: FastifyInstance) {
             return service.getPublicUser(id);
         },
     );
+
     fastify.put(
         '/admin/users/:id',
         {

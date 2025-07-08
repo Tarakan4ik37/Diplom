@@ -13,6 +13,7 @@ import {
 } from './types/getManyAnimeTypes.ts';
 import { AnimeUpdateRequest } from './types/updateAnimeTypes.ts';
 import { $Enums } from '@prisma/client';
+import { StatusGetManyResponse } from './types/getManyStatusTypes.ts';
 
 export class AnimeService {
     constructor(private readonly fastify: FastifyInstance) {}
@@ -42,12 +43,14 @@ export class AnimeService {
                     select: {
                         id: true,
                         name: true,
+                        posterURl: true,
                     },
                 },
                 symmetricRelated: {
                     select: {
                         id: true,
                         name: true,
+                        posterURl: true,
                     },
                 },
             },
@@ -280,5 +283,50 @@ export class AnimeService {
         await this.fastify.prisma.statusViewing.create({
             data: { status, userId, animeId },
         });
+    }
+
+    public async getByStatus(
+        userId: number,
+        page: number,
+        limit: number,
+        status?: $Enums.StatusViewingUser,
+        search?: string,
+    ): Promise<StatusGetManyResponse> {
+        const results = await this.fastify.prisma.statusViewing.findMany({
+            where: {
+                userId,
+                ...(status ? { status } : {}),
+                anime: {
+                    name: search
+                        ? {
+                              contains: search,
+                              mode: 'insensitive',
+                          }
+                        : undefined,
+                },
+            },
+            select: {
+                anime: {
+                    select: {
+                        id: true,
+                        name: true,
+                        type: true,
+                        posterURl: true,
+                        averageRating: true,
+                        description: true,
+                        releaseDate: true,
+                        genres: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+        return results.map((entry) => entry.anime);
     }
 }

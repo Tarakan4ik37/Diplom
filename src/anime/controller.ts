@@ -26,6 +26,18 @@ import {
 import { animePutBodyRequest } from './schemes/updateAnimeSchemes.ts';
 import { $Enums } from '@prisma/client';
 import { convertEnumToScheme } from '../generic/utils.ts';
+import {
+    StatusGetByRequest,
+    StatusGetManyResponse,
+} from './types/getManyStatusTypes.ts';
+import {
+    statusGetManyResponse,
+    statusGetManyRequest,
+} from './schemes/getManyStatusSchemes.ts';
+import {
+    statusGetOneRequest,
+    statusGetOneResponse,
+} from './schemes/getStatusUserSchemes.ts';
 
 export async function animeController(fastify: FastifyInstance) {
     const animeService = new AnimeService(fastify);
@@ -100,6 +112,7 @@ export async function animeController(fastify: FastifyInstance) {
         },
     );
 
+    //добавление статуса аниме пользователем
     fastify.patch<{
         Params: { id: number };
         Querystring: { status: $Enums.StatusViewingUser };
@@ -151,6 +164,61 @@ export async function animeController(fastify: FastifyInstance) {
             const id = Number(request.params.id);
             await animeService.delete(id);
             return { success: true };
+        },
+    );
+
+    //Получение аниме в профиль
+    fastify.get<StatusGetByRequest>(
+        '/anime/status-viewing',
+        {
+            preHandler: [fastify.authenticate],
+            schema: {
+                tags: ['users'],
+                querystring: statusGetManyRequest,
+                response: { '2xx': statusGetManyResponse },
+            },
+        },
+        async (request): Promise<StatusGetManyResponse> => {
+            return animeService.getByStatus(
+                request.user.id,
+                request.query.page,
+                request.query.limit,
+                request.query.status,
+                request.query.search,
+            );
+        },
+    );
+
+    //Получение статуса просмотра пользователя
+    fastify.get<{
+        Params: { animeId: number };
+    }>(
+        '/anime/status-viewing/:animeId',
+        {
+            preHandler: [fastify.authenticate],
+            schema: {
+                tags: ['users'],
+                params: statusGetOneRequest,
+                response: {
+                    '2xx': statusGetOneResponse,
+                },
+            },
+        },
+        async (request) => {
+            const { animeId } = request.params;
+            const userId = request.user.id;
+
+            const result = await fastify.prisma.statusViewing.findFirst({
+                where: {
+                    userId,
+                    animeId,
+                },
+                select: {
+                    status: true,
+                },
+            });
+
+            return { status: result?.status ?? undefined };
         },
     );
 }

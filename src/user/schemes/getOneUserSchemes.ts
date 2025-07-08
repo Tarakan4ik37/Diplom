@@ -3,7 +3,7 @@ const baseUserProperties = {
     nickName: { type: 'string' },
     email: { type: 'string' },
     firstName: { type: 'string', nullable: true },
-    lastName: { type: 'string', nullable: true },
+    lastMame: { type: 'string', nullable: true },
     midName: { type: 'string', nullable: true },
 };
 

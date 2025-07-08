@@ -61,7 +61,7 @@ export class UserService {
             where: { id },
             data: {
                 firstName: data.firstName,
-                lastMame: data.lastMame,
+                lastMame: data.lastName,
                 midName: data.midName,
             },
         });
@@ -79,7 +79,7 @@ export class UserService {
                 where: { id },
                 data: {
                     firstName: data.firstName,
-                    lastMame: data.lastMame,
+                    lastMame: data.lastName,
                     midName: data.midName,
                     nickName: data.nickName,
                 },

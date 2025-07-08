@@ -1,5 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import createError from 'http-errors';
+import {
+    CommentCreateRequest,
+    CommentCreateResponse,
+} from './types/createCommentTypes.ts';
 
 export class CommentService {
     constructor(private readonly fastify: FastifyInstance) {}
@@ -57,5 +61,30 @@ export class CommentService {
         }
 
         await this.deleteWithReplies(id);
+    }
+
+    public async create(
+        data: CommentCreateRequest['Body'],
+        userId: number,
+    ): Promise<CommentCreateResponse> {
+        const { text, parentId } = data;
+
+        if (!parentId) {
+            throw createError(
+                401,
+                'Комментарий должен быть ответом на что либо',
+            );
+        }
+
+        const comment = await this.fastify.prisma.comment.create({
+            select: { id: true },
+            data: {
+                text,
+                userId,
+                ...(parentId && { parentId }),
+            },
+        });
+
+        return { commentId: comment.id, success: true };
     }
 }

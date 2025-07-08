@@ -26,11 +26,11 @@ export async function userMeController(fastify: FastifyInstance) {
     );
 
     fastify.get(
-        '/meAdmin',
+        '/admin/users/:id',
         {
             preHandler: [fastify.admin],
             schema: {
-                tags: ['me'],
+                tags: ['admin'],
                 response: { '2xx': userSelfGetOneResponse },
             },
         },
@@ -38,6 +38,7 @@ export async function userMeController(fastify: FastifyInstance) {
             return service.getUserSelf(request.user.id);
         },
     );
+
     fastify.put(
         '/me',
         {

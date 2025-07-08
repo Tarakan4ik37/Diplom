@@ -7,6 +7,10 @@ import {
 
 import createError from 'http-errors';
 import { ReviewUpdateRequest } from './types/updateReviewTypes.ts';
+import {
+    ReviewCreateRequest,
+    ReviewCreateResponse,
+} from './types/createReviewTypes.ts';
 
 export class ReviewsService {
     constructor(private readonly fastify: FastifyInstance) {}
@@ -119,5 +123,39 @@ export class ReviewsService {
         }
 
         await this.fastify.prisma.review.delete({ where: { id } });
+    }
+
+    public async create(
+        data: ReviewCreateRequest['Body'],
+        userId: number,
+    ): Promise<ReviewCreateResponse> {
+        const { animeId, rating, commentText } = data;
+
+        // Если есть текст — создаём коммент отдельно
+        let commentId: number | undefined;
+
+        if (commentText) {
+            const comment = await this.fastify.prisma.comment.create({
+                select: { id: true },
+                data: {
+                    text: commentText,
+                    userId,
+                },
+            });
+
+            commentId = comment.id;
+        }
+
+        const review = await this.fastify.prisma.review.create({
+            select: { id: true },
+            data: {
+                animeId,
+                rating,
+                userId,
+                ...(commentId && { commentId }),
+            },
+        });
+
+        return { reviewId: review.id, success: true };
     }
 }

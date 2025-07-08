@@ -30,11 +30,15 @@ export async function authController(fastify: FastifyInstance) {
                     path: '/',
                     httpOnly: false,
                     maxAge: accessTokenTtl,
+                    sameSite: 'none',
+                    secure: true,
                 })
                 .setCookie('refreshToken', refreshToken, {
                     path: '/',
                     httpOnly: true,
                     maxAge: refreshTokenTtl,
+                    sameSite: 'none',
+                    secure: true,
                 })
                 .send({ success: true });
         },
@@ -63,7 +67,7 @@ export async function authController(fastify: FastifyInstance) {
 
             if (!refreshToken) {
                 return reply
-                    .status(401)
+                    .status(400)
                     .send({ error: 'Отсутствует refresh token' });
             }
 
@@ -98,7 +102,7 @@ export async function authController(fastify: FastifyInstance) {
                     })
                     .send({ success: true });
             } catch {
-                reply.status(401).send({ error: 'Invalid refresh token' });
+                reply.status(400).send({ error: 'Invalid refresh token' });
             }
         },
     );
@@ -131,7 +135,7 @@ export async function authController(fastify: FastifyInstance) {
             await authService.confirmEmail(request.query.token);
 
             // TODO: поменять на страницу входа на фронте
-            reply.redirect('http://localhost:3000/login', 302);
+            reply.redirect('http://localhost:5173', 302);
         },
     );
 }

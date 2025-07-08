@@ -26,6 +26,22 @@ import {
     commentIdParams,
     commentUpdateBodyRequest,
 } from './schemes/updateCommentSchemes.ts';
+import {
+    ReviewCreateRequest,
+    ReviewCreateResponse,
+} from './types/createReviewTypes.ts';
+import {
+    reviewCreateBodyRequest,
+    reviewCreateResponse,
+} from './schemes/createReviewSchemes.ts';
+import {
+    CommentCreateRequest,
+    CommentCreateResponse,
+} from './types/createCommentTypes.ts';
+import {
+    commentCreateBodyRequest,
+    commentCreateResponse,
+} from './schemes/createCommentSchemes.ts';
 
 export async function reviewsController(fastify: FastifyInstance) {
     const reviewService = new ReviewsService(fastify);
@@ -178,6 +194,38 @@ export async function reviewsController(fastify: FastifyInstance) {
         async (request): Promise<{ success: true }> => {
             await commentService.deleteByAdmin(request.params.id);
             return { success: true };
+        },
+    );
+
+    //Создание ответов коментов
+    fastify.post<CommentCreateRequest>(
+        '/comments',
+        {
+            preHandler: [fastify.authenticate],
+            schema: {
+                tags: ['comment'],
+                body: commentCreateBodyRequest,
+                response: { '2xx': commentCreateResponse },
+            },
+        },
+        async (request): Promise<CommentCreateResponse> => {
+            return commentService.create(request.body, request.user.id);
+        },
+    );
+
+    //Создания отзыва
+    fastify.post<ReviewCreateRequest>(
+        '/reviews',
+        {
+            preHandler: [fastify.authenticate],
+            schema: {
+                tags: ['review'],
+                body: reviewCreateBodyRequest,
+                response: { '2xx': reviewCreateResponse },
+            },
+        },
+        async (request): Promise<ReviewCreateResponse> => {
+            return reviewService.create(request.body, request.user.id);
         },
     );
 }

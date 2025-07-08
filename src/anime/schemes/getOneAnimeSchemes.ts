@@ -67,7 +67,9 @@ export const animeGetOneResponse = {
                     name: { type: 'string' },
                     posterURl: { type: 'string' },
                 },
+                required: ['id'],
             },
         },
     },
+    required: ['id', 'status', 'name', 'source', 'releaseDate'],
 };

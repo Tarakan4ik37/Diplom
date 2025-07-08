@@ -1,9 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { GenresService } from './service.ts';
-import {
-    genresGetManyRequest,
-    genresGetManyResponse,
-} from './schemes/getManyGenresSchemes.ts';
+import { genresGetManyResponse } from './schemes/getManyGenresSchemes.ts';
 import {
     GenresGetManyRequest,
     GenresGetManyResponse,
@@ -27,10 +24,9 @@ export async function genresController(fastify: FastifyInstance) {
     fastify.get<GenresGetManyRequest>(
         '/genres',
         {
-            preHandler: [fastify.admin],
             schema: {
                 tags: ['genres'],
-                querystring: genresGetManyRequest,
+
                 response: { '2xx': genresGetManyResponse },
             },
         },

@@ -11,9 +11,16 @@ import { authController } from './auth/controller.ts';
 import jwtPlugin from './auth/jwt.ts';
 import { userMeController } from './user/meController.ts';
 import { userController } from './user/userController.ts';
+import cors from '@fastify/cors';
 
 const fastify = Fastify({
     logger: true,
+});
+
+await fastify.register(cors, {
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
+    credentials: true,
 });
 
 await fastify.register(fastifySwagger, {
